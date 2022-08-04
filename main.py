@@ -26,6 +26,7 @@ def run_game():
   
     #Watches for keyboard and mouse events
     gf.check_events()
+    
     # Redraw the screen during each pass through the loop.
     screen.fill(ai_settings.bg_color)
     ship.blitme()
