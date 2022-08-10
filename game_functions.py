@@ -62,8 +62,12 @@ def update_bullets(bullets):
         if bullet.rect.bottom <= 0:
           bullets.remove(bullet)
 
-def update_aliens(aliens):
-    """Update the positions of all aliens in the fleet"""
+def update_aliens(ai_settings, aliens):
+    """
+    Check if the fleet is at an edge,
+        and then update the positions of all aliens in the fleet
+    """
+    check_fleet_edges(ai_settings, aliens)
     aliens.update()
 
 def fire_bullets(ai_settings, screen, ship, bullets):
@@ -108,3 +112,16 @@ def get_number_rows(ai_settings, ship_height, alien_height):
                             (3 * alien_height) - ship_height)
     number_rows = int(available_space_y / (2 * alien_height))
     return number_rows
+
+def check_fleet_edges(ai_settings, aliens):
+        """Respond appropriately if any aliens have reached an edge"""
+        for alien in aliens.sprites():
+            change_fleet_direction(ai_settings, aliens)
+            break
+
+def change_fleet_direction(ai_settings, aliens):
+    """Drop the entire fleet and change the fleet's direction"""
+    for alien in aliens.sprites():
+        alien.rect.y += ai_settings.fleet_drop_speed
+    ai_settings.fleet_direction *= -1
+
