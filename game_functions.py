@@ -67,19 +67,6 @@ def get_number_rows(ai_settings, ship_height, alien_height):
     return number_rows
 
 
-    """Create a full fleet of aliens"""
-    # Create an alien and find the number of aliens in a row
-    # Spacing between each alien is equal to one alien width
-    alien = Alien(ai_settings, screen)
-    number_aliens_x = get_number_aliens_x(ai_settings, alien.rect.width)    
-    number_rows = get_number_rows(ai_settings, ship.rect.height, alien.rect.height)
-
-    # Create the first row of aliens
-    for row_number in range(number_rows):
-        for alien_number in range(number_aliens_x):
-            create_alien(ai_settings, screen, aliens, alien_number,
-            row_number)
-
 def create_alien(ai_settings, screen, aliens, alien_number, row_number):
     """Create an alien and place it in the row"""
     alien = Alien(ai_settings, screen)
@@ -110,7 +97,17 @@ def update_screen(ai_settings, screen, ship, aliens, bullets):
     #Make the most recently drawn screen visible
     pygame.display.flip()
 
-def update_bullets(aliens, bullets):
+def check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets):
+    """Respond to bullet-aklien collisions"""
+    # Remove any bullets and aliens that have collided
+    collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
+
+    if len(aliens) == 0:
+        # Destroy exisitng bullets and create new fleet
+        bullets.empty()
+        create_fleet(ai_settings, screen, ship, aliens)
+
+def update_bullets(ai_settings, screen, ship, aliens, bullets):
     """Updates position of bllets and get rid of old bullets"""
     # Update bullet positions
     bullets.update()
@@ -149,21 +146,11 @@ def change_fleet_direction(ai_settings, aliens):
         alien.rect.y += ai_settings.fleet_drop_speed
     ai_settings.fleet_direction *= -1
 
-def check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets):
-    """Respond to bullet-aklien collisions"""
-    # Remove any bullets and aliens that have collided
-    collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
-
-    if len(aliens) == 0:
-        # Destroy exisitng bullets and create new fleet
-        bullets.empty()
-        create_fleet(ai_settings, screen, ship, aliens)
-
 def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
     """Respond to ship being hit by alien"""
-    if stats.ship_left > 0:
+    if stats.ships_left > 0:
         # Decrement ships_left
-        stats.ship_left -= 1
+        stats.ships_left -= 1
 
         # Empty the list of aliens and bullets
         aliens.empty()
@@ -181,7 +168,7 @@ def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
 def check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets):
     """Check if any aliens have reached the bottom of the screen"""
     screen_rect = screen.get_rect()
-    for alien in aliens.spriters():
+    for alien in aliens.sprites():
         if alien.rect.bottom >= screen_rect.bottom:
             # Treat this the same as if the ship got hit
             ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
